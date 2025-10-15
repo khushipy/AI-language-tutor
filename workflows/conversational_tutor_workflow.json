@@ -1,0 +1,295 @@
+{
+  "name": "AI Tutor - Conversational Tutor",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chat",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "readRows",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "AI Tutor Users",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Users",
+          "mode": "list",
+          "cachedResultName": "Users"
+        },
+        "options": {
+          "headerRow": true,
+          "firstDataRow": 2,
+          "range": "A:F"
+        },
+        "filter": {
+          "conditions": [
+            {
+              "column": "userId",
+              "condition": "equal",
+              "value": "={{$node[\"Webhook\"].json[\"userId\"]}}"
+            }
+          ]
+        }
+      },
+      "name": "GoogleSheets - Get User",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [450, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": "googleSheetsOAuth2Api"
+      }
+    },
+    {
+      "parameters": {
+        "operation": "readRows",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "AI Tutor Conversations",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Conversations",
+          "mode": "list",
+          "cachedResultName": "Conversations"
+        },
+        "options": {
+          "headerRow": true,
+          "firstDataRow": 2,
+          "range": "A:D"
+        },
+        "filter": {
+          "conditions": [
+            {
+              "column": "userId",
+              "condition": "equal",
+              "value": "={{$node[\"Webhook\"].json[\"userId\"]}}"
+            }
+          ]
+        },
+        "limit": 10,
+        "sort": [
+          {
+            "column": "timestamp",
+            "order": "desc"
+          }
+        ]
+      },
+      "name": "GoogleSheets - Get Chat History",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [650, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": "googleSheetsOAuth2Api"
+      }
+    },
+    {
+      "parameters": {
+        "model": "gpt-3.5-turbo",
+        "options": {},
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a language tutor. Your personality is: {{$node[\"GoogleSheets - Get User\"].json[\"values\"][0][4]}}. The user's native language is {{$node[\"GoogleSheets - Get User\"].json[\"values\"][0][1]}} and they want to learn {{$node[\"GoogleSheets - Get User\"].json[\"values\"][0][2]}}. The current topic is: {{$node[\"GoogleSheets - Get User\"].json[\"values\"][0][3]}}. Keep responses concise and educational."
+            },
+            {
+              "role": "user",
+              "content": "={{$node[\"Webhook\"].json[\"message\"]}}"
+            }
+          ]
+        }
+      },
+      "name": "OpenAI",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [850, 300],
+      "credentials": {
+        "openAiApi": "openAiApi"
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "AI Tutor Conversations",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Conversations",
+          "mode": "list",
+          "cachedResultName": "Conversations"
+        },
+        "options": {},
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": "={\n  'userId': $node[\"Webhook\"].json[\"userId\"],\n  'role': 'user',\n  'message': $node[\"Webhook\"].json[\"message\"],\n  'timestamp': $now\n}"
+        }
+      },
+      "name": "GoogleSheets - Save User Message",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [1050, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": "googleSheetsOAuth2Api"
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "AI Tutor Conversations",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Conversations",
+          "mode": "list",
+          "cachedResultName": "Conversations"
+        },
+        "options": {},
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": "={\n  'userId': $node[\"Webhook\"].json[\"userId\"],\n  'role': 'assistant',\n  'message': $node[\"OpenAI\"].json[\"choices\"][0][\"message\"][\"content\"],\n  'timestamp': $now\n}"
+        }
+      },
+      "name": "GoogleSheets - Save AI Response",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [1250, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": "googleSheetsOAuth2Api"
+      }
+    },
+    {
+      "parameters": {
+        "text": "={{$node[\"OpenAI\"].json[\"choices\"][0][\"message\"][\"content\"]}}",
+        "options": {}
+      },
+      "name": "Google Cloud Text-to-Speech",
+      "type": "n8n-nodes-base.googleCloudTextToSpeech",
+      "typeVersion": 1,
+      "position": [1450, 300],
+      "credentials": {
+        "googleCloudTextToSpeechOAuth2Api": "googleCloudTextToSpeechOAuth2Api"
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "response": {
+            "response": "audio"
+          }
+        },
+        "responseData": "={{$node[\"Google Cloud Text-to-Speech\"].json[\"audioContent\"]]}}"
+      },
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1650, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "GoogleSheets - Get User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GoogleSheets - Get User": {
+      "main": [
+        [
+          {
+            "node": "GoogleSheets - Get Chat History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GoogleSheets - Get Chat History": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "GoogleSheets - Save User Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GoogleSheets - Save User Message": {
+      "main": [
+        [
+          {
+            "node": "GoogleSheets - Save AI Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GoogleSheets - Save AI Response": {
+      "main": [
+        [
+          {
+            "node": "Google Cloud Text-to-Speech",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Cloud Text-to-Speech": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "id": "2"
+}

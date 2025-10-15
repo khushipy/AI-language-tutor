@@ -1,0 +1,82 @@
+{
+  "name": "AI Tutor - User Onboarding",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "user-onboarding",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "list",
+          "cachedResultName": "AI Tutor Users",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Users",
+          "mode": "list",
+          "cachedResultName": "Users"
+        },
+        "options": {},
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": "={\n  'userId': $json[\"userId\"],\n  'nativeLanguage': $json[\"nativeLanguage\"],\n  'targetLanguage': $json[\"targetLanguage\"],\n  'learningTopic': $json[\"learningTopic\"],\n  'aiPersonality': $json[\"aiPersonality\"],\n  'createdAt': $now\n}"
+        }
+      },
+      "name": "GoogleSheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [450, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": "googleSheetsOAuth2Api"
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [650, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "GoogleSheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GoogleSheets": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "id": "1"
+}
