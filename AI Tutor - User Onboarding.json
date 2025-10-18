@@ -1,0 +1,402 @@
+{
+  "name": "AI Tutor - User Onboarding",
+  "nodes": [
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "10rIgS7bFM6aOtKtxOGDAlSI0be1JsCWKE8NlaFqEsJs",
+          "mode": "list",
+          "cachedResultName": "AI Language Tutor",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10rIgS7bFM6aOtKtxOGDAlSI0be1JsCWKE8NlaFqEsJs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 250223900,
+          "mode": "list",
+          "cachedResultName": "Conversations",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10rIgS7bFM6aOtKtxOGDAlSI0be1JsCWKE8NlaFqEsJs/edit#gid=250223900"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "userId",
+              "lookupValue": "={{$node[\"Webhook1\"].json[\"userId\"]}}"
+            }
+          ]
+        },
+        "combineFilters": "AND",
+        "options": {}
+      },
+      "name": "GoogleSheets - Get User",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [
+        512,
+        240
+      ],
+      "id": "1e38c8a7-66c7-499f-a106-6e48c38c3353",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "FXKtJWTgVTStlTE4",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "readRows",
+        "documentId": {
+          "__rl": true,
+          "value": "10rIgS7bFM6aOtKtxOGDAlSI0be1JsCWKE8NlaFqEsJs",
+          "mode": "list",
+          "cachedResultName": "AI Language Tutor",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10rIgS7bFM6aOtKtxOGDAlSI0be1JsCWKE8NlaFqEsJs/edit?usp=drivesdk"
+        }
+      },
+      "name": "GoogleSheets - Get Chat History",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [
+        704,
+        240
+      ],
+      "id": "a63e5692-a417-4152-8760-81eadfcbc878",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "FXKtJWTgVTStlTE4",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "prompt": {
+          "messages": [
+            {
+              "role": "system",
+              "content": "=You are a friendly language tutor. The user is learning {{$node[\"GoogleSheets - Get User\"].json[\"values\"][0][2]}} (native language: {{$node[\"GoogleSheets - Get User\"].json[\"values\"][0][1]}}). Keep responses educational and encouraging."
+            },
+            {
+              "content": "={{$node[\"Webhook\"].json[\"message\"]}}"
+            }
+          ]
+        },
+        "options": {},
+        "requestOptions": {}
+      },
+      "name": "OpenAI",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [
+        912,
+        240
+      ],
+      "id": "592fbeaa-6987-4e2f-9210-f2f63524883a",
+      "credentials": {
+        "openAiApi": {
+          "id": "lehRkD5FHCtBk5jq",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "10rIgS7bFM6aOtKtxOGDAlSI0be1JsCWKE8NlaFqEsJs",
+          "mode": "list",
+          "cachedResultName": "AI Language Tutor",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10rIgS7bFM6aOtKtxOGDAlSI0be1JsCWKE8NlaFqEsJs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 250223900,
+          "mode": "list",
+          "cachedResultName": "Conversations",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10rIgS7bFM6aOtKtxOGDAlSI0be1JsCWKE8NlaFqEsJs/edit#gid=250223900"
+        },
+        "dataMode": "autoMapInputData",
+        "options": {}
+      },
+      "name": "GoogleSheets - Save User Message",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [
+        1104,
+        240
+      ],
+      "id": "ef4e1f6d-7a83-4032-8152-dd8194cb6a64",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "FXKtJWTgVTStlTE4",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "10rIgS7bFM6aOtKtxOGDAlSI0be1JsCWKE8NlaFqEsJs",
+          "mode": "list",
+          "cachedResultName": "AI Language Tutor",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10rIgS7bFM6aOtKtxOGDAlSI0be1JsCWKE8NlaFqEsJs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 250223900,
+          "mode": "list",
+          "cachedResultName": "Conversations",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10rIgS7bFM6aOtKtxOGDAlSI0be1JsCWKE8NlaFqEsJs/edit#gid=250223900"
+        },
+        "dataMode": "autoMapInputData",
+        "options": {}
+      },
+      "name": "GoogleSheets - Save AI Response",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [
+        1312,
+        240
+      ],
+      "id": "679c51ad-ae11-4f31-945d-7cc44daf229e",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "FXKtJWTgVTStlTE4",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"response\": $node[\"OpenAI\"].json[\"choices\"][0][\"message\"][\"content\"]\n}\n",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "Application/json"
+              }
+            ]
+          }
+        }
+      },
+      "name": "Respond to Webhook1",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1520,
+        240
+      ],
+      "id": "12fbc4ed-be7b-4c09-810a-14d12db3116a"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chat",
+        "options": {}
+      },
+      "name": "Webhook1",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        304,
+        240
+      ],
+      "id": "4e327fee-de4b-45bd-9aa6-8f843fcb25a3",
+      "webhookId": "cc4f105c-d347-463b-9aa2-40842236c9d2"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "user-onboarding",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        320,
+        0
+      ],
+      "webhookId": "webhook-user-onboarding",
+      "id": "8dbcde14-5451-4f72-989f-6035043db3fa"
+    },
+    {
+      "parameters": {
+        "functionCode": "return {\n  json: {\n    userId: $input.item.json.userId,\n    nativeLanguage: $input.item.json.nativeLanguage,\n    targetLanguage: $input.item.json.targetLanguage,\n    learningTopic: $input.item.json.learningTopic,\n    aiPersonality: $input.item.json.aiPersonality,\n    createdAt: new Date().toISOString()\n  }\n};"
+      },
+      "name": "Process Data",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        528,
+        0
+      ],
+      "id": "d5c9a3ec-3e17-49dd-a2d6-b853c405303d"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "10rIgS7bFM6aOtKtxOGDAlSI0be1JsCWKE8NlaFqEsJs",
+          "mode": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1890838951,
+          "mode": "list",
+          "cachedResultName": "Users",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10rIgS7bFM6aOtKtxOGDAlSI0be1JsCWKE8NlaFqEsJs/edit#gid=1890838951"
+        },
+        "dataMode": "autoMapInputData",
+        "options": {}
+      },
+      "name": "GoogleSheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [
+        720,
+        0
+      ],
+      "id": "c843c3cd-8b0e-4f40-8489-6251ab7cb3d2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "FXKtJWTgVTStlTE4",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        928,
+        0
+      ],
+      "id": "18bc4b6b-09aa-441d-a808-a85233ef2c21"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "GoogleSheets - Get User": {
+      "main": [
+        [
+          {
+            "node": "GoogleSheets - Get Chat History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GoogleSheets - Get Chat History": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "GoogleSheets - Save User Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GoogleSheets - Save User Message": {
+      "main": [
+        [
+          {
+            "node": "GoogleSheets - Save AI Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GoogleSheets - Save AI Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "GoogleSheets - Get User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Process Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Data": {
+      "main": [
+        [
+          {
+            "node": "GoogleSheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GoogleSheets": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5bf791f1-2775-469a-a942-f363f7416fd2",
+  "meta": {
+    "instanceId": "241a2fdb26ab24b03e048aa3e822f422d1e94cd030f3f162fc62c32ab7b15aa3"
+  },
+  "id": "2QUy1Tqe1Wfoiny9",
+  "tags": []
+}
